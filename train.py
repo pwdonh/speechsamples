@@ -10,10 +10,12 @@ import argparse
 parser = argparse.ArgumentParser(description='DeepSpeech training')
 parser.add_argument('--model-type', metavar='DIR',
         help='path to train manifest csv', default='VoxResNet')
+parser.add_argument('--basepath', metavar='DIR',
+        help='path to train manifest csv', default='/meg/meg1/users/peterd/')
 parser.add_argument('--train-manifest', metavar='DIR',
-        help='path to train manifest csv', default='/meg/meg1/users/peterd/data/Language/dev_mp3/identification_train.csv')
+        help='path to train manifest csv', default='data/Language/voxceleb2/identification_train.csv')
 parser.add_argument('--test-manifest', metavar='DIR',
-        help='path to test manifest csv', default='/meg/meg1/users/peterd/data/Language/dev_mp3/identification_test.csv')
+        help='path to test manifest csv', default='data/Language/voxceleb2/identification_test.csv')
 parser.add_argument('--savefile', metavar='DIR',
         help='path to test manifest csv', default='./exp/state_dict.pkl')
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
@@ -24,18 +26,20 @@ print(args)
 torch.manual_seed(123456)
 torch.cuda.manual_seed_all(123456)
 
-# train_manifest = '/meg/meg1/users/peterd/data/Language/dev_mp3/identification_train.csv'
-# test_manifest = '/meg/meg1/users/peterd/data/Language/dev_mp3/identification_test.csv'
+# basepath = '/meg/meg1/users/peterd/'
+# train_manifest = 'data/Language/voxceleb2/identification_train.csv'
+# test_manifest = 'data/Language/voxceleb2/identification_train.csv'
 # model_type = 'VoxResNetVAE'
 # exec('model_class = '+model_type)
 exec('model_class = '+args.model_type)
+basepath = args.basepath
 train_manifest = args.train_manifest
 test_manifest = args.test_manifest
 savefile = args.savefile
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 batch_size = 64
 
-train_dataset = SpectrogramDataset(audio_conf, train_manifest)
+train_dataset = SpectrogramDataset(audio_conf, train_manifest, basepath)
 train_sampler = BucketingSampler(train_dataset, batch_size=batch_size)
 train_loader = AudioDataLoader(train_dataset, num_workers=1, batch_sampler=train_sampler)
 test_dataset = SpectrogramDataset(audio_conf, test_manifest)
@@ -105,3 +109,8 @@ for epoch in range(30):
         best_val_loss = avg_test_loss/i
         with open(savefile, 'wb') as f:
             torch.save(model.state_dict(), f)
+
+# # for testing
+# for i, (data) in enumerate(train_loader, start=0):
+#     break
+# data[0]

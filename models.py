@@ -101,7 +101,7 @@ def voxresnet34(model_type=VoxResNet, embed_size=512, **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
     if model_type=='VoxResNet':
-        model = VoxResNet(models.resnet.BasicBlock, [3, 4, 6, 3], **kwargs)
+        model = VoxResNet(models.resnet.BasicBlock, [3, 4, 6, 3], embed_size, **kwargs)
     elif model_type=='VoxResNetVAE':
-        model = VoxResNetVAE(models.resnet.BasicBlock, [3, 4, 6, 3], **kwargs)
+        model = VoxResNetVAE(models.resnet.BasicBlock, [3, 4, 6, 3], embed_size, **kwargs)
     return model

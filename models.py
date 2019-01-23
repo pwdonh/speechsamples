@@ -60,7 +60,7 @@ class VoxResNet(models.resnet.ResNet):
 
 class VoxResNetVAE(VoxResNet):
     def __init__(self, block, layers, embed_size, num_classes=5995):
-        super(VoxResNetVAE, self).__init__(block, layers, num_classes)
+        super(VoxResNetVAE, self).__init__(block, layers, embed_size, num_classes)
         self.fc_var = nn.Linear(512, embed_size)
         self.loss = LossVAE()
 

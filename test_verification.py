@@ -39,7 +39,7 @@ similarity = []
 same = []
 
 for i, data in enumerate(test_loader):
-    data = (data[0].to(device), data[1].to(device))
+    data = (data[0].to(device), data[1].to(device), data[2].to(device))
     print(i)
     same.append( data[2].item() )
     out1 = model(data[0])

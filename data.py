@@ -10,7 +10,7 @@ class SpectrogramDataset(Dataset, SpectrogramParser):
     def __init__(self, audio_conf, manifest_filepath, basepath, normalize=False, augment=False):
         """
         """
-        with open(os.path.join(basepath,manifest_filepath)) as f:
+        with open(manifest_filepath) as f:
             ids = f.readlines()
         ids = [x.strip().split(',') for x in ids]
         self.ids = ids

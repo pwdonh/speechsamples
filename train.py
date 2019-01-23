@@ -13,9 +13,9 @@ parser.add_argument('--model-type', metavar='DIR',
 parser.add_argument('--basepath', metavar='DIR',
         help='path to train manifest csv', default='/meg/meg1/users/peterd/')
 parser.add_argument('--train-manifest', metavar='DIR',
-        help='path to train manifest csv', default='data/Language/voxceleb2/identification_train.csv')
+        help='path to train manifest csv', default='./data/identification_train.csv')
 parser.add_argument('--test-manifest', metavar='DIR',
-        help='path to test manifest csv', default='data/Language/voxceleb2/identification_test.csv')
+        help='path to test manifest csv', default='./data/identification_test.csv')
 parser.add_argument('--savefile', metavar='DIR',
         help='path to test manifest csv', default='./exp/state_dict.pkl')
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
@@ -42,7 +42,7 @@ batch_size = 64
 train_dataset = SpectrogramDataset(audio_conf, train_manifest, basepath)
 train_sampler = BucketingSampler(train_dataset, batch_size=batch_size)
 train_loader = AudioDataLoader(train_dataset, num_workers=1, batch_sampler=train_sampler)
-test_dataset = SpectrogramDataset(audio_conf, test_manifest)
+test_dataset = SpectrogramDataset(audio_conf, test_manifest, basepath)
 test_sampler = BucketingSampler(test_dataset, batch_size=batch_size)
 test_loader = AudioDataLoader(test_dataset, num_workers=1, batch_sampler=test_sampler)
 

@@ -73,7 +73,7 @@ class VoxResNetVAE(VoxResNet):
         if self.training:
             z = self.reparameterize(z, logvar)
         x = self.fc(z)
-        return x, mu, logvar
+        return x, z, logvar
 
     def loss_eval(self, input, target):
         input, mu, logvar = input

@@ -52,7 +52,7 @@ class VoxResNet(models.resnet.ResNet):
         return x
 
 class VoxResNetVAE(VoxResNet):
-    def __init__(self, block, layers, embed_size=50, num_classes=5995):
+    def __init__(self, block, layers, embed_size=100, num_classes=5995):
         super(VoxResNetVAE, self).__init__(block, layers, num_classes)
         self.fc_mu = nn.Linear(512, embed_size)
         self.fc_var = nn.Linear(512, embed_size)

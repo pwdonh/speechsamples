@@ -6,7 +6,7 @@ import torch
 
 # adapted from the torch resnet
 class VoxResNet(models.resnet.ResNet):
-    def __init__(self, block, layers, num_classes=5995):
+    def __init__(self, block, layers, embed_size, num_classes=5995):
         self.inplanes = 64
         super(VoxResNet, self).__init__(block, layers, num_classes)
         # 1 channel except 3
@@ -16,7 +16,8 @@ class VoxResNet(models.resnet.ResNet):
         self.fcpre = nn.Conv2d(512, 512, kernel_size=(9,1))
         # self.avgpool = nn.AvgPool2d((1,10))
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
-        self.fc = nn.Linear(512, num_classes)
+        self.fc_mu = nn.Linear(512, embed_size)
+        self.fc = nn.Linear(embed_size, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -26,11 +27,16 @@ class VoxResNet(models.resnet.ResNet):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
+        if embed_size==512:
+            self.fc_mu.weight.data = torch.eye(512)
+            self.fc_mu.bias.data.zero()
+
         self.loss = nn.CrossEntropyLoss()
         self.loss_eval = nn.CrossEntropyLoss()
 
     def forward(self, x):
         x = self.trunk(x)
+        x = self.fc_mu(x)
         x = self.fc(x)
 
         return x
@@ -53,11 +59,9 @@ class VoxResNet(models.resnet.ResNet):
         return x
 
 class VoxResNetVAE(VoxResNet):
-    def __init__(self, block, layers, embed_size=100, num_classes=5995):
+    def __init__(self, block, layers, embed_size, num_classes=5995):
         super(VoxResNetVAE, self).__init__(block, layers, num_classes)
-        self.fc_mu = nn.Linear(512, embed_size)
         self.fc_var = nn.Linear(512, embed_size)
-        self.fc = nn.Linear(embed_size, num_classes)
         self.loss = LossVAE()
 
     def encode(self, x):
@@ -90,11 +94,14 @@ class LossVAE(nn.Module):
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         return CE + KLD
 
-def voxresnet34(model_type=VoxResNet, **kwargs):
+def voxresnet34(model_type=VoxResNet, embed_size=512, **kwargs):
     """Constructs a ResNet-34 model.
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = model_type(models.resnet.BasicBlock, [3, 4, 6, 3], **kwargs)
+    if model_type=='VoxResNet':
+        model = VoxResNet(models.resnet.BasicBlock, [3, 4, 6, 3], **kwargs)
+    elif model_type=='VoxResNetVAE':
+        model = VoxResNetVAE(models.resnet.BasicBlock, [3, 4, 6, 3], **kwargs)
     return model

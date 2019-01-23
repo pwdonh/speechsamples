@@ -18,8 +18,14 @@ parser.add_argument('--test-manifest', metavar='DIR',
         help='path to test manifest csv', default='./data/identification_test.csv')
 parser.add_argument('--savefile', metavar='DIR',
         help='path to test manifest csv', default='./exp/state_dict.pkl')
+parser.add_argument('--embed-size', type=int,
+        help='path to test manifest csv', default=512)
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
+
+# lin = nn.Linear(100,100)
+# help(lin.weight.data)
+
 
 print(args)
 
@@ -31,11 +37,13 @@ torch.cuda.manual_seed_all(123456)
 # test_manifest = 'data/Language/voxceleb2/identification_train.csv'
 # model_type = 'VoxResNetVAE'
 # exec('model_class = '+model_type)
-exec('model_class = '+args.model_type)
+# exec('model_class = '+args.model_type)
+model_type = args.model_type
 basepath = args.basepath
 train_manifest = args.train_manifest
 test_manifest = args.test_manifest
 savefile = args.savefile
+embed_size = args.embed_size
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 batch_size = 64
 
@@ -46,7 +54,7 @@ test_dataset = SpectrogramDataset(audio_conf, test_manifest, basepath)
 test_sampler = BucketingSampler(test_dataset, batch_size=batch_size)
 test_loader = AudioDataLoader(test_dataset, num_workers=1, batch_sampler=test_sampler)
 
-model = voxresnet34(model_class)
+model = voxresnet34(model_type, embed_size)
 if args.cuda:
     model.cuda()
     device = torch.device("cuda:0")

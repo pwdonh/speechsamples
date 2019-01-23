@@ -6,6 +6,8 @@ import torch
 import argparse
 
 parser = argparse.ArgumentParser(description='DeepSpeech training')
+parser.add_argument('--basepath', metavar='DIR',
+        help='path to train manifest csv', default='/meg/meg1/users/peterd/')
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
 
@@ -18,6 +20,7 @@ else:
 
 import os
 savefile = './exp/v1/state_dict.pkl'
+basepath = args.basepath
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 
 checkpoint_load = torch.load(savefile)

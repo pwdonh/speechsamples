@@ -40,8 +40,12 @@ class SpectrogramVerificationDataset(SpectrogramDataset):
     def __getitem__(self, index):
         sample = self.ids[index]
         audio_path_1, audio_path_2, same = sample[0], sample[1], sample[2]
-        spect_1 = self.parse_audio(os.path.join(self.basepath,audio_path_1))
-        spect_2 = self.parse_audio(os.path.join(self.basepath,audio_path_2))
+        # index 3 second window
+        # offset = np.random.uniform(0, float(audiolen)-3)
+        # offset = int(np.floor(offset*self.sample_rate))
+        index = np.arange(self.sample_rate*3)
+        spect_1 = self.parse_audio(os.path.join(self.basepath,audio_path_1), index=index)
+        spect_2 = self.parse_audio(os.path.join(self.basepath,audio_path_2), index=index)
         spect_1 = torchz(spect_1.view(1,spect_1.size()[0],spect_1.size()[1]))
         spect_2 = torchz(spect_2.view(1,spect_2.size()[0],spect_2.size()[1]))
         return spect_1, spect_2, int(same)

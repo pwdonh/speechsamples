@@ -20,6 +20,7 @@ else:
 
 import os
 savefile = './exp/v1/state_dict.pkl'
+# basepath = '/meg/meg1/users/peterd/'
 basepath = args.basepath
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 
@@ -29,7 +30,7 @@ model.load_state_dict(checkpoint_load)
 test_manifest = './data/verification_test_all.csv'
 
 test_dataset = SpectrogramVerificationDataset(audio_conf, test_manifest, basepath)
-test_sampler = BucketingSampler(test_dataset, batch_size=1)
+test_sampler = BucketingSampler(test_dataset, batch_size=64)
 test_loader = AudioDataLoader(test_dataset, num_workers=1, batch_sampler=test_sampler)
 
 model.eval()
@@ -40,11 +41,11 @@ same = []
 
 for i, data in enumerate(test_loader):
     data = (data[0].to(device), data[1].to(device), data[2].to(device))
-    print(i)
-    same.append( data[2].item() )
-    out1 = model(data[0])
-    out2 = model(data[1])
-    similarity.append( sim(out1, out2).item() )
+    print('{} of {}'.format(i, len(test_loader)))
+    same += list(data[2].data.numpy())
+    out1 = model.trunk(data[0])
+    out2 = model.trunk(data[1])
+    similarity += list(sim(out1, out2).data.numpy())
 
 same = np.array(same)
 similarity = np.array(similarity)

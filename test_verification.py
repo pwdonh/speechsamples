@@ -17,7 +17,7 @@ audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 
 checkpoint_load = torch.load(savefile)
 model.load_state_dict(checkpoint_load)
 
-test_manifest = './data/verification_test_all.csv')
+test_manifest = './data/verification_test_all.csv'
 
 test_dataset = SpectrogramVerificationDataset(audio_conf, test_manifest, basepath)
 test_sampler = BucketingSampler(test_dataset, batch_size=1)

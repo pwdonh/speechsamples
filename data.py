@@ -35,7 +35,7 @@ class SpectrogramVerificationDataset(SpectrogramDataset):
     def __init__(self, audio_conf, manifest_filepath, basepath, normalize=False, augment=False):
         """
         """
-        super(SpectrogramVerificationDataset, self).__init__(audio_conf, basepath, normalize, augment)
+        super(SpectrogramVerificationDataset, self).__init__(audio_conf, manifest_filepath, basepath, normalize, augment)
 
     def __getitem__(self, index):
         sample = self.ids[index]

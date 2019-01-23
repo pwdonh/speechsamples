@@ -3,6 +3,12 @@ from models import *
 from data import *
 import torch
 
+import argparse
+
+parser = argparse.ArgumentParser(description='DeepSpeech training')
+parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
+args = parser.parse_args()
+
 model = voxresnet34(VoxResNet)
 if args.cuda:
     model.cuda()

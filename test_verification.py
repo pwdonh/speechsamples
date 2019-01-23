@@ -3,7 +3,7 @@ from models import *
 from data import *
 import torch
 
-model = voxresnet34(VoxResNetAdaptive)
+model = voxresnet34(VoxResNet)
 if args.cuda:
     model.cuda()
     device = torch.device("cuda:0")
@@ -11,15 +11,15 @@ else:
     device = torch.device("cpu")
 
 import os
-savefile = os.environ['LOCAL']+'/Projects/speechsamples/voxceleb_exp/exp/v1/state_dict.pkl'
+savefile = './exp/v1/state_dict.pkl'
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 
 checkpoint_load = torch.load(savefile)
 model.load_state_dict(checkpoint_load)
 
-test_manifest = os.path.join(os.environ['LOCAL'], 'data/Language/voxceleb1/verification_test_all.csv')
+test_manifest = './data/verification_test_all.csv')
 
-test_dataset = SpectrogramVerificationDataset(audio_conf, test_manifest)
+test_dataset = SpectrogramVerificationDataset(audio_conf, test_manifest, basepath)
 test_sampler = BucketingSampler(test_dataset, batch_size=1)
 test_loader = AudioDataLoader(test_dataset, num_workers=1, batch_sampler=test_sampler)
 

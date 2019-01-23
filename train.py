@@ -19,6 +19,8 @@ parser.add_argument('--savefile', metavar='DIR',
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
 
+print(args)
+
 torch.manual_seed(123456)
 torch.cuda.manual_seed_all(123456)
 

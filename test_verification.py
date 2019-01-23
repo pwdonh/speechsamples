@@ -42,10 +42,10 @@ same = []
 for i, data in enumerate(test_loader):
     data = (data[0].to(device), data[1].to(device), data[2].to(device))
     print('{} of {}'.format(i, len(test_loader)))
-    same += list(data[2].data.numpy())
+    same += list(data[2].data.cpu().numpy())
     out1 = model.trunk(data[0])
     out2 = model.trunk(data[1])
-    similarity += list(sim(out1, out2).data.numpy())
+    similarity += list(sim(out1, out2).data.cpu().numpy())
 
 same = np.array(same)
 similarity = np.array(similarity)

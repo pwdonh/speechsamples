@@ -14,7 +14,8 @@ class VoxResNet(models.resnet.ResNet):
                                bias=False)
         # fully connected layers to be invariant to temporal position
         self.fcpre = nn.Conv2d(512, 512, kernel_size=(9,1))
-        self.avgpool = nn.AvgPool2d((1,10))
+        # self.avgpool = nn.AvgPool2d((1,10))
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.fc = nn.Linear(512, num_classes)
 
         for m in self.modules():
@@ -88,14 +89,6 @@ class LossVAE(nn.Module):
         CE = F.cross_entropy(input, target)
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         return CE + KLD
-
-# adapted from the torch resnet
-class VoxResNetAdaptive(VoxResNet):
-    def __init__(self, block, layers, num_classes=5995):
-        self.inplanes = 64
-        super(VoxResNetAdaptive, self).__init__(block, layers, num_classes)
-        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
-
 
 def voxresnet34(model_type=VoxResNet, **kwargs):
     """Constructs a ResNet-34 model.

@@ -92,7 +92,7 @@ class LossVAE(nn.Module):
         input, mu, logvar = input
         CE = F.cross_entropy(input, target)
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-        return CE+KLD
+        return CE, KLD
 
 def voxresnet34(model_type=VoxResNet, embed_size=512, **kwargs):
     """Constructs a ResNet-34 model.

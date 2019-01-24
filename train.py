@@ -21,12 +21,13 @@ parser.add_argument('--savefile', metavar='DIR',
 parser.add_argument('--embed-size', type=int,
         help='path to test manifest csv', default=512)
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
+parser.add_argument('--reduced', dest='reduced', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
 
 print(args)
 
-torch.manual_seed(123456)
-torch.cuda.manual_seed_all(123456)
+torch.manual_seed(1234567)
+torch.cuda.manual_seed_all(1234567)
 
 # basepath = '/meg/meg1/users/peterd/'
 # train_manifest = 'data/Language/voxceleb2/identification_train.csv'
@@ -42,8 +43,12 @@ savefile = args.savefile
 embed_size = args.embed_size
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 batch_size = 64
+gamma = 1e-4
 
 train_dataset = SpectrogramDataset(audio_conf, train_manifest, basepath)
+if args.reduced:
+    train_dataset.ids = train_dataset.ids[:17730] # only 100 identities
+    train_dataset.size = len(train_dataset.ids)
 train_sampler = BucketingSampler(train_dataset, batch_size=batch_size)
 train_loader = AudioDataLoader(train_dataset, num_workers=1, batch_sampler=train_sampler)
 test_dataset = SpectrogramDataset(audio_conf, test_manifest, basepath)
@@ -63,6 +68,13 @@ best_val_loss = 0.
 
 for epoch in range(30):
 
+    if model_type=='VoxResNetVAE':
+        if epoch>0:
+            gamma = avg_loss_kl/avg_loss_ce
+            print(gamma)
+        avg_loss_ce = 0.
+        avg_loss_kl = 0.
+
     model.train()
     avg_loss = 0.
     epoch_start = time()
@@ -74,6 +86,14 @@ for epoch in range(30):
         # Prediction
         out = model(data[0])
         loss = model.loss(out, data[1])
+        if model_type=='VoxResNetVAE':
+            avg_loss_ce += loss[0].item()
+            avg_loss_kl += loss[1].item()
+            print('Batch {} of {}, {} {}'.format(i, n_batch, loss[0].item(), loss[1].item()))
+            loss = loss[0]+gamma*loss[1]
+        else:
+            avg_loss += loss.item()
+            print('Batch {} of {}, {}'.format(i, n_batch, loss.item()))
 
         # compute gradient
         optimizer.zero_grad()
@@ -85,13 +105,11 @@ for epoch in range(30):
         # torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_norm)
         optimizer.step()
 
-        print('Batch {} of {}, {}'.format(i, n_batch, loss.item()))
-
-        loss_eval = model.loss_eval(out, data[1])
-        avg_loss += loss_eval.item()
-
         if (i>0) and (i%10==0):
-            print('Average training loss: {}'.format(avg_loss/i))
+            if model_type=='VoxResNetVAE':
+                print('Average training loss: {} {}'.format(avg_loss_ce/i, avg_loss_kl/i))
+            else:
+                print('Average training loss: {}'.format(avg_loss/i))
             epoch_time = time()-epoch_start
             print('Epoch {}: {} of {} minutes'.format(epoch, epoch_time/60, ((epoch_time/i)*(n_batch))/60))
 

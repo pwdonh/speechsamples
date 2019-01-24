@@ -41,7 +41,7 @@ class VoxResNet(models.resnet.ResNet):
 
         return x
 
-    def trunk(self, x):
+    def conv_all(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -52,7 +52,10 @@ class VoxResNet(models.resnet.ResNet):
         x = self.layer3(x)
         x = self.layer4(x)
 
-        x = self.fcpre(x)
+        return self.fcpre(x)
+
+    def trunk(self, x):
+        x = self.conv_all(x)
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
 
@@ -92,7 +95,7 @@ class LossVAE(nn.Module):
         input, mu, logvar = input
         CE = F.cross_entropy(input, target)
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-        return CE+KLD
+        return CE, KLD
 
 def voxresnet34(model_type=VoxResNet, embed_size=512, **kwargs):
     """Constructs a ResNet-34 model.

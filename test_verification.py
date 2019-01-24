@@ -13,13 +13,6 @@ parser.add_argument('--savefile', metavar='DIR',
         help='path to test manifest csv', default='./exp/state_dict.pkl')
 args = parser.parse_args()
 
-model = voxresnet34('VoxResNet')
-if args.cuda:
-    model.cuda()
-    device = torch.device("cuda:0")
-else:
-    device = torch.device("cpu")
-
 import os
 # savefile = './exp/v1/state_dict.pkl'
 savefile = args.savefile
@@ -28,9 +21,17 @@ basepath = args.basepath
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 
 checkpoint_load = torch.load(savefile)
-checkpoint_load.keys()
-checkpoint_load['fc_mu.weight'] = torch.eye(512).cuda()
-checkpoint_load['fc_mu.bias'] = torch.zeros(512).cuda()
+# checkpoint_load['fc_mu.weight'] = torch.eye(512).cuda()
+# checkpoint_load['fc_mu.bias'] = torch.zeros(512).cuda()
+embed_size = checkpoint_load['fc_mu.weight'].shape[0]
+
+model = voxresnet34('VoxResNet', embed_size)
+if args.cuda:
+    model.cuda()
+    device = torch.device("cuda:0")
+else:
+    device = torch.device("cpu")
+
 model.load_state_dict(checkpoint_load)
 
 test_manifest = './data/verification_test_all.csv'
@@ -65,8 +66,6 @@ for i, data in enumerate(test_loader):
     similarity += list(sim(out1, out2).data.cpu().numpy())
     if (i>0) and (i%20==0):
         print(compute_eer(np.array(same), np.array(similarity)))
-
-
 
 
 

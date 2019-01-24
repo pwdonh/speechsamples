@@ -11,7 +11,7 @@ parser.add_argument('--basepath', metavar='DIR',
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
 
-model = voxresnet34(VoxResNet)
+model = voxresnet34('VoxResNet')
 if args.cuda:
     model.cuda()
     device = torch.device("cuda:0")
@@ -25,6 +25,9 @@ basepath = args.basepath
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 
 checkpoint_load = torch.load(savefile)
+checkpoint_load.keys()
+checkpoint_load['fc_mu.weight'] = torch.eye(512).cuda()
+checkpoint_load['fc_mu.bias'] = torch.zeros(512).cuda()
 model.load_state_dict(checkpoint_load)
 
 test_manifest = './data/verification_test_all.csv'
@@ -60,11 +63,13 @@ for thresh in np.arange(.5,.99,.001):
     # print('{}: {} {}'.format(thresh,a,b))
 rates[np.argmin(diffs)]
 
+
+
 #
 # import seaborn
-# import matplotlib.pyplot as plt
-# plt.hist(similarity[same==0])
-# plt.hist(similarity[same==1])
+import matplotlib.pyplot as plt
+plt.hist(similarity[same==0], alpha=.5)
+plt.hist(similarity[same==1], alpha=.5)
 #
 # import pandas as pd
 # pd.DataFrame({'different': similarity[same==0], 'same': similarity[same==1]})

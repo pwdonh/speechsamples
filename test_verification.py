@@ -36,6 +36,17 @@ test_dataset = SpectrogramVerificationDataset(audio_conf, test_manifest, basepat
 test_sampler = BucketingSampler(test_dataset, batch_size=64)
 test_loader = AudioDataLoader(test_dataset, num_workers=1, batch_sampler=test_sampler)
 
+def compute_eer(same, similarity):
+    diffs = []
+    rates = []
+    for thresh in np.arange(.5,.99,.001):
+        a=sum((same==1) & ((similarity>thresh)==False))/sum(same==1)
+        b=sum((same==0) & ((similarity>thresh)==True))/sum(same==0)
+        diffs.append(abs(a-b))
+        rates.append(np.mean([a,b]))
+        # print('{}: {} {}'.format(thresh,a,b))
+    return rates[np.argmin(diffs)]
+
 model.eval()
 sim = torch.nn.CosineSimilarity()
 
@@ -49,19 +60,8 @@ for i, data in enumerate(test_loader):
     out1 = model.trunk(data[0])
     out2 = model.trunk(data[1])
     similarity += list(sim(out1, out2).data.cpu().numpy())
-
-same = np.array(same)
-similarity = np.array(similarity)
-
-diffs = []
-rates = []
-for thresh in np.arange(.5,.99,.001):
-    a=sum((same==1) & ((similarity>thresh)==False))/sum(same==1)
-    b=sum((same==0) & ((similarity>thresh)==True))/sum(same==0)
-    diffs.append(abs(a-b))
-    rates.append(np.mean([a,b]))
-    # print('{}: {} {}'.format(thresh,a,b))
-rates[np.argmin(diffs)]
+    if (i>0) and (i%100==0):
+        print(compute_eer(np.array(same), np.array(similarity)))
 
 
 

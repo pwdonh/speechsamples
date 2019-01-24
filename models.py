@@ -29,7 +29,7 @@ class VoxResNet(models.resnet.ResNet):
 
         if embed_size==512:
             self.fc_mu.weight.data = torch.eye(512)
-            self.fc_mu.bias.data.zero()
+            self.fc_mu.bias.data.zero_()
 
         self.loss = nn.CrossEntropyLoss()
         self.loss_eval = nn.CrossEntropyLoss()

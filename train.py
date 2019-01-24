@@ -73,7 +73,7 @@ for epoch in range(30):
 
     if model_type=='VoxResNetVAE':
         if epoch>0:
-            gamma = avg_loss_kl/avg_loss_ce
+            gamma = avg_loss_ce/avg_loss_kl
             print(gamma)
         avg_loss_ce = 0.
         avg_loss_kl = 0.

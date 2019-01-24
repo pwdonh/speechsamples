@@ -63,7 +63,7 @@ for i, data in enumerate(test_loader):
     out1 = model.trunk(data[0])
     out2 = model.trunk(data[1])
     similarity += list(sim(out1, out2).data.cpu().numpy())
-    if (i>0) and (i%100==0):
+    if (i>0) and (i%20==0):
         print(compute_eer(np.array(same), np.array(similarity)))
 
 

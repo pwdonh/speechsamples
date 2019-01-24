@@ -23,10 +23,6 @@ parser.add_argument('--embed-size', type=int,
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
 
-# lin = nn.Linear(100,100)
-# help(lin.weight.data)
-
-
 print(args)
 
 torch.manual_seed(123456)

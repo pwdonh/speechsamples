@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser(description='DeepSpeech training')
 parser.add_argument('--basepath', metavar='DIR',
         help='path to train manifest csv', default='/meg/meg1/users/peterd/')
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
+parser.add_argument('--savefile', metavar='DIR',
+        help='path to test manifest csv', default='./exp/state_dict.pkl')
 args = parser.parse_args()
 
 model = voxresnet34('VoxResNet')
@@ -19,7 +21,8 @@ else:
     device = torch.device("cpu")
 
 import os
-savefile = './exp/v1/state_dict.pkl'
+# savefile = './exp/v1/state_dict.pkl'
+savefile = args.savefile
 # basepath = '/meg/meg1/users/peterd/'
 basepath = args.basepath
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}

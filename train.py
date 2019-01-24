@@ -46,10 +46,10 @@ batch_size = 64
 gamma = 1e-4
 
 train_dataset = SpectrogramDataset(audio_conf, train_manifest, basepath)
-train_sampler = BucketingSampler(train_dataset, batch_size=batch_size)
 if args.reduced:
     train_dataset.ids = train_dataset.ids[:17730] # only 100 identities
     train_dataset.size = len(train_dataset.ids)
+train_sampler = BucketingSampler(train_dataset, batch_size=batch_size)
 train_loader = AudioDataLoader(train_dataset, num_workers=1, batch_sampler=train_sampler)
 test_dataset = SpectrogramDataset(audio_conf, test_manifest, basepath)
 if args.reduced:

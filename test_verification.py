@@ -11,7 +11,7 @@ parser.add_argument('--basepath', metavar='DIR',
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
 
-model = voxresnet34(VoxResNet)
+model = voxresnet34('VoxResNet')
 if args.cuda:
     model.cuda()
     device = torch.device("cuda:0")
@@ -59,6 +59,8 @@ for thresh in np.arange(.5,.99,.001):
     rates.append(np.mean([a,b]))
     # print('{}: {} {}'.format(thresh,a,b))
 rates[np.argmin(diffs)]
+
+
 
 #
 # import seaborn

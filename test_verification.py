@@ -24,8 +24,12 @@ checkpoint_load = torch.load(savefile)
 # checkpoint_load['fc_mu.weight'] = torch.eye(512).cuda()
 # checkpoint_load['fc_mu.bias'] = torch.zeros(512).cuda()
 embed_size = checkpoint_load['fc_mu.weight'].shape[0]
+if 'fc_var.weight' in checkpoint_load:
+    model_type = 'VoxResNetVAE'
+else:
+    model_type = 'VoxResNet'
 
-model = voxresnet34('VoxResNet', embed_size)
+model = voxresnet34(model_type, embed_size)
 if args.cuda:
     model.cuda()
     device = torch.device("cuda:0")
@@ -64,7 +68,7 @@ for i, data in enumerate(test_loader):
     out1 = model.trunk(data[0])
     out2 = model.trunk(data[1])
     similarity += list(sim(out1, out2).data.cpu().numpy())
-    if (i>0) and (i%20==0):
+    if (i>0) and (i%10==0):
         print(compute_eer(np.array(same), np.array(similarity)))
 
 

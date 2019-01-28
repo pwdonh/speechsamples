@@ -119,7 +119,7 @@ class SpectrogramParser(AudioParser):
         # D = librosa.stft(y, n_fft=2**9, hop_length=hop_length,
         #                  win_length=win_length, window=self.window)
         # spect, phase = librosa.magphase(D)
-        D = scipy.signal.stft(y, 16000, window='hamming', nperseg=win_length, noverlap=hop_length, nfft=2**9)[-1]
+        D = scipy.signal.stft(y, 16000, window='hamming', nperseg=win_length, noverlap=win_length-hop_length, nfft=2**9)[-1]
         spect = np.abs(D).squeeze()
         # S = log(S+1)
         spect = np.log1p(spect)

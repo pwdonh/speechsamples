@@ -20,6 +20,8 @@ parser.add_argument('--savefile', metavar='DIR',
         help='path to test manifest csv', default='./exp/state_dict.pkl')
 parser.add_argument('--embed-size', type=int,
         help='path to test manifest csv', default=512)
+parser.add_argument('--lrate', type=float,
+        help='path to test manifest csv', default=1e-3)
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 parser.add_argument('--reduced', dest='reduced', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
@@ -73,13 +75,13 @@ for epoch in range(30):
 
     if model_type=='VoxResNetVAE':
         if epoch>0:
-            gamma = avg_loss_ce/avg_loss_kl
-            print(gamma)
-        avg_loss_ce = 0.
-        avg_loss_kl = 0.
+            gamma = np.median(avg_loss_ce)/np.median(avg_loss_kl)
+            print('New gamma: {}'.format(gamma))
+        avg_loss_ce = []
+        avg_loss_kl = []
 
     model.train()
-    avg_loss = 0.
+    avg_loss = []
     epoch_start = time()
     train_sampler.shuffle(epoch)
     for i, (data) in enumerate(train_loader, start=0):
@@ -90,12 +92,12 @@ for epoch in range(30):
         out = model(data[0])
         loss = model.loss(out, data[1])
         if model_type=='VoxResNetVAE':
-            avg_loss_ce += loss[0].item()
-            avg_loss_kl += loss[1].item()
+            avg_loss_ce += [loss[0].item()]
+            avg_loss_kl += [loss[1].item()]
             print('Batch {} of {}, {} {}'.format(i, n_batch, loss[0].item(), loss[1].item()))
             loss = loss[0]+gamma*loss[1]
         else:
-            avg_loss += loss.item()
+            avg_loss += [loss.item()]
             print('Batch {} of {}, {}'.format(i, n_batch, loss.item()))
 
         # compute gradient
@@ -110,9 +112,9 @@ for epoch in range(30):
 
         if (i>0) and (i%10==0):
             if model_type=='VoxResNetVAE':
-                print('Average training loss: {} {}'.format(avg_loss_ce/i, avg_loss_kl/i))
+                print('Average training loss: {} {}'.format(np.median(avg_loss_ce), np.median(avg_loss_kl)))
             else:
-                print('Average training loss: {}'.format(avg_loss/i))
+                print('Average training loss: {}'.format(np.median(avg_loss)))
             epoch_time = time()-epoch_start
             print('Epoch {}: {} of {} minutes'.format(epoch, epoch_time/60, ((epoch_time/i)*(n_batch))/60))
 

@@ -75,7 +75,7 @@ for epoch in range(30):
 
     if model_type=='VoxResNetVAE':
         if epoch>0:
-            gamma = np.median(avg_loss_ce)/np.median(avg_loss_kl)
+            gamma = float(np.median(avg_loss_ce)/np.median(avg_loss_kl))
             print('New gamma: {}'.format(gamma))
         avg_loss_ce = []
         avg_loss_kl = []

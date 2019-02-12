@@ -22,6 +22,8 @@ parser.add_argument('--embed-size', type=int,
         help='path to test manifest csv', default=512)
 parser.add_argument('--lrate', type=float,
         help='path to test manifest csv', default=1e-3)
+parser.add_argument('--beta', type=float,
+        help='path to test manifest csv', default=1e-4)
 parser.add_argument('--cuda', dest='cuda', action='store_true', help='Use cuda to train model')
 parser.add_argument('--reduced', dest='reduced', action='store_true', help='Use cuda to train model')
 args = parser.parse_args()
@@ -45,7 +47,7 @@ savefile = args.savefile
 embed_size = args.embed_size
 audio_conf = {'sample_rate': 16000, 'window_size': .025, 'window_stride': .010, 'window': 'hamming'}
 batch_size = 64
-gamma = 1e-4
+beta = args.beta
 
 train_dataset = SpectrogramDataset(audio_conf, train_manifest, basepath)
 if args.reduced:
@@ -74,9 +76,9 @@ best_val_loss = 0.
 for epoch in range(30):
 
     if model_type=='VoxResNetVAE':
-        if epoch>0:
-            gamma = float(np.median(avg_loss_ce)/np.median(avg_loss_kl))
-            print('New gamma: {}'.format(gamma))
+        # if epoch>0:
+        #     gamma = float(np.median(avg_loss_ce)/np.median(avg_loss_kl))
+        #     print('New gamma: {}'.format(gamma))
         avg_loss_ce = []
         avg_loss_kl = []
 
@@ -95,7 +97,7 @@ for epoch in range(30):
             avg_loss_ce += [loss[0].item()]
             avg_loss_kl += [loss[1].item()]
             print('Batch {} of {}, {} {}'.format(i, n_batch, loss[0].item(), loss[1].item()))
-            loss = loss[0]+gamma*loss[1]
+            loss = loss[0]+beta*loss[1]
         else:
             avg_loss += [loss.item()]
             print('Batch {} of {}, {}'.format(i, n_batch, loss.item()))
